@@ -22,7 +22,9 @@ public class UserMainInterface extends Application
         Scene scene = new Scene(root, primaryStage.getWidth(), primaryStage.getHeight());
         scene.setRoot(root);
         primaryStage.setScene(scene);
+        primaryStage.setTitle("University data");
         primaryStage.show();
+        
     }
 
 }
