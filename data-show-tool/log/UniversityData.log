@@ -1,2 +1,88 @@
 [2018-06-08 14:45:31,356][de.crbk.db.controller.UniversityData] DEBUG: HI
 [2018-06-08 14:47:47,637][de.crbk.db.controller.UniversityData] DEBUG: s.fknasöoivnm
+[2018-06-10 16:24:49,393][de.crbk.db.controller.UniversityData] INFO: Start to connect to database. Read properties.
+[2018-06-10 16:24:49,396][de.crbk.db.controller.UniversityData] INFO: URL: 
+[2018-06-10 16:24:49,766][de.crbk.db.controller.UniversityData] ERROR: de.crbk.db.controller.exceptions.DataToolException: An error occour while creating database connection
+[2018-06-10 16:24:49,767][de.crbk.db.controller.UniversityData] INFO: Database connection will be closed.
+[2018-06-10 16:25:17,881][de.crbk.db.controller.UniversityData] INFO: Start to connect to database. Read properties.
+[2018-06-10 16:25:17,885][de.crbk.db.controller.UniversityData] INFO: URL: 
+[2018-06-10 16:25:17,991][de.crbk.db.controller.UniversityData] ERROR: An error occour while creating database connection
+de.crbk.db.controller.exceptions.DataToolException: An error occour while creating database connection
+	at de.crbk.db.controller.UniversityData.createDatabaseConnection(UniversityData.java:104)
+	at de.crbk.db.controller.UniversityData.execute(UniversityData.java:64)
+	at de.crbk.db.controller.UniversityData.main(UniversityData.java:39)
+Caused by: java.sql.SQLNonTransientConnectionException: Cannot load connection class because of underlying exception: com.mysql.cj.exceptions.WrongArgumentException: Malformed database URL, failed to parse the main URL sections.
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:108)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:95)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:87)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:61)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:71)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:79)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:131)
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:231)
+	at java.sql.DriverManager.getConnection(DriverManager.java:664)
+	at java.sql.DriverManager.getConnection(DriverManager.java:247)
+	at de.crbk.db.controller.UniversityData.createDatabaseConnection(UniversityData.java:96)
+	... 2 more
+Caused by: com.mysql.cj.exceptions.UnableToConnectException: Cannot load connection class because of underlying exception: com.mysql.cj.exceptions.WrongArgumentException: Malformed database URL, failed to parse the main URL sections.
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:59)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:103)
+	... 6 more
+Caused by: com.mysql.cj.exceptions.WrongArgumentException: Malformed database URL, failed to parse the main URL sections.
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:59)
+	at com.mysql.cj.conf.ConnectionUrlParser.parseConnectionString(ConnectionUrlParser.java:139)
+	at com.mysql.cj.conf.ConnectionUrlParser.<init>(ConnectionUrlParser.java:129)
+	at com.mysql.cj.conf.ConnectionUrlParser.parseConnectionString(ConnectionUrlParser.java:118)
+	at com.mysql.cj.conf.ConnectionUrl.getConnectionUrlInstance(ConnectionUrl.java:179)
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:201)
+	... 5 more
+[2018-06-10 16:25:18,013][de.crbk.db.controller.UniversityData] INFO: Database connection will be closed.
+[2018-06-10 16:28:54,614][de.crbk.db.controller.UniversityData] INFO: Start to connect to database. Read properties.
+[2018-06-10 16:28:54,614][de.crbk.db.controller.UniversityData] INFO: URL: jdbc:mysql://localhost:3306/universitaet_projekt
+[2018-06-10 16:28:55,160][de.crbk.db.controller.UniversityData] ERROR: An error occour while creating database connection
+de.crbk.db.controller.exceptions.DataToolException: An error occour while creating database connection
+	at de.crbk.db.controller.UniversityData.createDatabaseConnection(UniversityData.java:104)
+	at de.crbk.db.controller.UniversityData.execute(UniversityData.java:64)
+	at de.crbk.db.controller.UniversityData.main(UniversityData.java:39)
+Caused by: java.sql.SQLException: The server time zone value 'MitteleuropÃ¤ische Sommerzeit' is unrecognized or represents more than one time zone. You must configure either the server or JDBC driver (via the serverTimezone configuration property) to use a more specifc time zone value if you want to utilize time zone support.
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:127)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:95)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:87)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:61)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:71)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:76)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:862)
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:444)
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:230)
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:226)
+	at java.sql.DriverManager.getConnection(DriverManager.java:664)
+	at java.sql.DriverManager.getConnection(DriverManager.java:247)
+	at de.crbk.db.controller.UniversityData.createDatabaseConnection(UniversityData.java:96)
+	... 2 more
+Caused by: com.mysql.cj.exceptions.InvalidConnectionAttributeException: The server time zone value 'MitteleuropÃ¤ische Sommerzeit' is unrecognized or represents more than one time zone. You must configure either the server or JDBC driver (via the serverTimezone configuration property) to use a more specifc time zone value if you want to utilize time zone support.
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:59)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:83)
+	at com.mysql.cj.util.TimeUtil.getCanonicalTimezone(TimeUtil.java:128)
+	at com.mysql.cj.protocol.a.NativeProtocol.configureTimezone(NativeProtocol.java:2201)
+	at com.mysql.cj.protocol.a.NativeProtocol.initServerSession(NativeProtocol.java:2225)
+	at com.mysql.cj.jdbc.ConnectionImpl.initializePropsFromServer(ConnectionImpl.java:1391)
+	at com.mysql.cj.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:993)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:852)
+	... 8 more
+[2018-06-10 16:28:55,160][de.crbk.db.controller.UniversityData] INFO: Database connection will be closed.
+[2018-06-10 16:33:52,429][de.crbk.db.controller.UniversityData] INFO: Start to connect to database. Read properties.
+[2018-06-10 16:33:52,429][de.crbk.db.controller.UniversityData] INFO: URL: jdbc:mysql://localhost:3306/universitaet_projekt
+[2018-06-10 16:33:52,757][de.crbk.db.controller.UniversityData] INFO: Database connection is valid: true
+[2018-06-10 16:33:58,062][de.crbk.db.controller.UniversityData] INFO: Database connection will be closed.
