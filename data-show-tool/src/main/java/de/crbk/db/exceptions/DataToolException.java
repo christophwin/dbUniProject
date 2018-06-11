@@ -1,4 +1,4 @@
-package de.crbk.db.controller.exceptions;
+package de.crbk.db.exceptions;
 
 /**
  * Exception for this program extends form 'Exception' class

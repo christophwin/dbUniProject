@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import de.crbk.db.common.Constants;
-import de.crbk.db.controller.exceptions.DataToolException;
+import de.crbk.db.exceptions.DataToolException;
 import de.crbk.db.ui.UserMainInterface;
 import javafx.application.Application;
 
