@@ -73,7 +73,6 @@ public class UserMainInterface
 
     private void setRoleForInput(String text)
     {
-        // TODO Auto-generated method stub
         
     }
 
