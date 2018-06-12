@@ -61,12 +61,11 @@ public class UniversityData
         try
         {
             DOMConfigurator.configure(this.getClass().getResource(Constants.LOG4J));
-            createDatabaseConnection();
             Application.launch(UserMainInterface.class); // launches the main frame
         }
         catch (Exception e)
         {
-            LOG.error(e.getMessage(),e);
+            LOG.error(e.getMessage(), e);
         }
         finally
         {
@@ -81,13 +80,19 @@ public class UniversityData
      * 
      * @throws DataToolException if a error occur while connection
      */
-    private void createDatabaseConnection()
+    public void createDatabaseConnection()
         throws DataToolException
     {
         LOG.info("Start to connect to database. Read properties.");
         Properties props = new Properties();
         try
         {
+            if (databaseConnection != null && databaseConnection.isValid(1000))
+            {
+                LOG.debug("A database connection already exist.");
+                return;
+            }
+
             props.load(new FileInputStream(new File(this.getClass().getResource(Constants.PROPERTIES_FILE).toURI())));
 
             String connectionUrl = props.getProperty(Constants.DATABASE_URL_PROP);
