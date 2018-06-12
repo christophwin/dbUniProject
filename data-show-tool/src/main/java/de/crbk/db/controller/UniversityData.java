@@ -130,4 +130,10 @@ public class UniversityData
             }
         }
     }
+
+    public void setRoleForInput(String identificationNumber)
+    {
+        // TODO Auto-generated method stub
+        
+    }
 }

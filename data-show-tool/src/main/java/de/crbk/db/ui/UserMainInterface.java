@@ -61,6 +61,7 @@ public class UserMainInterface
         try
         {
             UniversityData.getInstance().createDatabaseConnection();
+            UniversityData.getInstance().setRoleForInput(identificationField.getText());
         }
         catch (DataToolException e)
         {
@@ -68,6 +69,12 @@ public class UserMainInterface
             AlertDialog.startDialog(AlertType.ERROR, "An error occur while database connection.",
                                     "See stack trace for details.", e);
         }
+    }
+
+    private void setRoleForInput(String text)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }
