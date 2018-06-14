@@ -6,16 +6,24 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import de.crbk.db.common.Constants;
+import de.crbk.db.common.DatabaseRoles;
+import de.crbk.db.common.DatabaseUserTables;
 import de.crbk.db.exceptions.DataToolException;
+import de.crbk.db.ui.AlertDialog;
 import de.crbk.db.ui.UserMainInterface;
 import javafx.application.Application;
+import javafx.scene.control.Alert.AlertType;
 
 /**
  * Only for application launch
@@ -131,9 +139,123 @@ public class UniversityData
         }
     }
 
+    /**
+     * checks if the given identification number is given in one of the user tables <br>
+     * set right role for this session
+     * 
+     * @param identificationNumber
+     * @throws DataToolException
+     */
     public void setRoleForInput(String identificationNumber)
+        throws DataToolException
     {
-        // TODO Auto-generated method stub
-        
+        LOG.debug("Try to find role for following identification number: " + identificationNumber);
+
+        if (existInTable(DatabaseUserTables.ASSISTANT_TABLE, identificationNumber))
+        {
+            setRoleForSession(DatabaseRoles.ASSISTANT);
+            LOG.info("Role set to: " + DatabaseRoles.ASSISTANT);
+        }
+        else if (existInTable(DatabaseUserTables.PROFESSOR_TABLE, identificationNumber))
+        {
+            setRoleForSession(DatabaseRoles.PROFESSOR);
+            LOG.info("Role set to: " + DatabaseRoles.PROFESSOR);
+        }
+        else if (existInTable(DatabaseUserTables.STUDENT_TABLE, identificationNumber))
+        {
+            setRoleForSession(DatabaseRoles.STUDENT);
+            LOG.info("Role set to: " + DatabaseRoles.STUDENT);
+        }
+        else if (existInTable(DatabaseUserTables.ADMIN_EMPLOYEES_TABLE, identificationNumber))
+        {
+            setRoleForSession(DatabaseRoles.ADMIN_EMPLOYEE);
+            LOG.info("Role set to: " + DatabaseRoles.ADMIN_EMPLOYEE);
+        }
+        else
+        {
+            AlertDialog.startDialog(AlertType.WARNING, "Identification number does not exist.",
+                                    "The given indentification number '" + identificationNumber
+                                        + "' does not exist in database.");
+        }
+    }
+
+    /**
+     * check if given identification number exist in this table
+     * 
+     * @param table
+     * @param identificationNumber
+     * @return
+     * @throws DataToolException
+     */
+    private boolean existInTable(String table, String identificationNumber)
+        throws DataToolException
+    {
+        String statement =
+            "SELECT * FROM " + table + " WHERE " + DatabaseUserTables.ID_COLUMN + " = '" + identificationNumber + "'";
+
+        LOG.debug("Execute following statement: " + statement);
+
+        try (PreparedStatement stmt = databaseConnection.prepareStatement(statement);
+                        ResultSet result = stmt.executeQuery())
+        {
+            return result.next();
+        }
+        catch (SQLException e)
+        {
+            throw new DataToolException("Error occur while checking if currnet identification number '"
+                + identificationNumber + "' exist in following table '" + table + "'.", e);
+        }
+    }
+
+    /**
+     * set given role for session
+     * 
+     * @param role
+     * @throws DataToolException
+     */
+    private void setRoleForSession(String role)
+        throws DataToolException
+    {
+        LOG.info("Set following role for current session: " + role);
+
+        String statement = "SET ROLE '" + role + "'";
+
+        LOG.debug("Execute following statement: " + statement);
+        try (PreparedStatement stmt = databaseConnection.prepareStatement(statement))
+        {
+            stmt.execute();
+        }
+        catch (SQLException e)
+        {
+            throw new DataToolException("Error while setting role for current session.", e);
+        }
+    }
+
+    /**
+     * method to get all avaible views
+     * 
+     * @return
+     * @throws DataToolException
+     */
+    private List<String> getAllViews()
+        throws DataToolException
+    {
+        LOG.info("Get all views for current role.");
+
+        String query = ""; // TODO
+        LOG.debug("Execute for views: " + query);
+        try (PreparedStatement stmt = databaseConnection.prepareStatement(query);
+                        ResultSet result = stmt.executeQuery())
+        {
+
+            // TODO
+
+        }
+        catch (SQLException e)
+        {
+            throw new DataToolException("Error while getting avaible views.", e);
+        }
+
+        return new ArrayList<>();
     }
 }
