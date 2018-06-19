@@ -13,4 +13,6 @@ public class Constants
     public static final String USER_PROP = "username";
     
     public static final String PASSWORD_PROP = "password";
+    
+    public static final String DATABASE_NAME = "universitaet_projekt";
 }

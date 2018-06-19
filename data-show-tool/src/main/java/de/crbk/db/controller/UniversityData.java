@@ -86,7 +86,8 @@ public class UniversityData
      * create the initial database connection <br>
      * set 'auto-commit' to 'false'
      * 
-     * @throws DataToolException if a error occur while connection
+     * @throws DataToolException
+     *             if a error occur while connection
      */
     public void createDatabaseConnection()
         throws DataToolException
@@ -107,7 +108,7 @@ public class UniversityData
             LOG.info("URL: " + connectionUrl);
 
             databaseConnection = DriverManager.getConnection(connectionUrl, props.getProperty(Constants.USER_PROP),
-                                                             props.getProperty(Constants.PASSWORD_PROP));
+                    props.getProperty(Constants.PASSWORD_PROP));
 
             databaseConnection.setAutoCommit(false);
             LOG.info("Database connection is valid: " + databaseConnection.isValid(1000));
@@ -140,7 +141,8 @@ public class UniversityData
     }
 
     /**
-     * checks if the given identification number is given in one of the user tables <br>
+     * checks if the given identification number is given in one of the user tables
+     * <br>
      * set right role for this session
      * 
      * @param identificationNumber
@@ -174,8 +176,7 @@ public class UniversityData
         else
         {
             AlertDialog.startDialog(AlertType.WARNING, "Identification number does not exist.",
-                                    "The given indentification number '" + identificationNumber
-                                        + "' does not exist in database.");
+                    "The given indentification number '" + identificationNumber + "' does not exist in database.");
         }
     }
 
@@ -190,20 +191,20 @@ public class UniversityData
     private boolean existInTable(String table, String identificationNumber)
         throws DataToolException
     {
-        String statement =
-            "SELECT * FROM " + table + " WHERE " + DatabaseUserTables.ID_COLUMN + " = '" + identificationNumber + "'";
+        String statement = "SELECT * FROM " + table + " WHERE " + DatabaseUserTables.ID_COLUMN + " = '"
+                + identificationNumber + "'";
 
         LOG.debug("Execute following statement: " + statement);
 
         try (PreparedStatement stmt = databaseConnection.prepareStatement(statement);
-                        ResultSet result = stmt.executeQuery())
+                ResultSet result = stmt.executeQuery())
         {
             return result.next();
         }
         catch (SQLException e)
         {
             throw new DataToolException("Error occur while checking if currnet identification number '"
-                + identificationNumber + "' exist in following table '" + table + "'.", e);
+                    + identificationNumber + "' exist in following table '" + table + "'.", e);
         }
     }
 
@@ -242,13 +243,15 @@ public class UniversityData
     {
         LOG.info("Get all views for current role.");
 
-        String query = ""; // TODO
+        String query = "SHOW FULL TABLES IN " + Constants.DATABASE_NAME + " WHERE TABLE_TYPE LIKE 'VIEW'"; // TODO
         LOG.debug("Execute for views: " + query);
         try (PreparedStatement stmt = databaseConnection.prepareStatement(query);
-                        ResultSet result = stmt.executeQuery())
+                ResultSet result = stmt.executeQuery())
         {
-
-            // TODO
+            
+            // fist column for name of view
+            result.getString(1);
+            
 
         }
         catch (SQLException e)
