@@ -138,10 +138,10 @@ public class UserMainInterface extends Application
                         new Callback<TableColumn<Map<String, String>, String>, TableCell<Map<String, String>, String>>()
                         {
                             @Override
-                            public TableCell<java.util.Map<String, String>, String> call(
-                                    javafx.scene.control.TableColumn<java.util.Map<String, String>, String> param)
+                            public TableCell<Map<String, String>, String> call(
+                                    javafx.scene.control.TableColumn<Map<String, String>, String> param)
                             {
-                                return new TextFieldTableCell<java.util.Map<String, String>, String>(
+                                return new TextFieldTableCell<Map<String, String>, String>(
                                         new StringConverter<String>()
                                         {
 
