@@ -238,27 +238,28 @@ public class UniversityData
      * @return
      * @throws DataToolException
      */
-    private List<String> getAllViews()
+    public List<String> getAllViews()
         throws DataToolException
     {
         LOG.info("Get all views for current role.");
 
-        String query = "SHOW FULL TABLES IN " + Constants.DATABASE_NAME + " WHERE TABLE_TYPE LIKE 'VIEW'"; // TODO
+        String query = "SHOW FULL TABLES IN " + Constants.DATABASE_NAME + " WHERE TABLE_TYPE LIKE 'VIEW'";
         LOG.debug("Execute for views: " + query);
+        List<String> views = new ArrayList<>();
         try (PreparedStatement stmt = databaseConnection.prepareStatement(query);
                 ResultSet result = stmt.executeQuery())
         {
-            
-            // fist column for name of view
-            result.getString(1);
-            
-
+            while(result.next())
+            {
+                views.add(result.getString(1));
+            }
         }
         catch (SQLException e)
         {
             throw new DataToolException("Error while getting avaible views.", e);
         }
 
-        return new ArrayList<>();
+        LOG.info("Views for current role.");
+        return views;
     }
 }

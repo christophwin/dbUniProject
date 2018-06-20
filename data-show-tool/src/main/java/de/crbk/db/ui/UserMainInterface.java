@@ -1,13 +1,22 @@
 package de.crbk.db.ui;
 
+import java.net.URL;
+import java.util.List;
+import java.util.Observable;
+import java.util.ResourceBundle;
+
 import org.apache.log4j.Logger;
 
 import de.crbk.db.common.Constants;
 import de.crbk.db.controller.UniversityData;
 import de.crbk.db.exceptions.DataToolException;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableArrayBase;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
@@ -62,6 +71,10 @@ public class UserMainInterface
         {
             UniversityData.getInstance().createDatabaseConnection();
             UniversityData.getInstance().setRoleForInput(identificationField.getText());
+            
+            ObservableList<String> viewsForRole = FXCollections.observableArrayList(UniversityData.getInstance().getAllViews());
+            this.resultListView.setItems(viewsForRole);
+            
         }
         catch (DataToolException e)
         {
@@ -71,9 +84,6 @@ public class UserMainInterface
         }
     }
 
-    private void setRoleForInput(String text)
-    {
-        
-    }
+
 
 }
