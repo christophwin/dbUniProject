@@ -146,9 +146,10 @@ public class UniversityData
      * set right role for this session
      * 
      * @param identificationNumber
+     * @return true -> number is known false -> number is nor known
      * @throws DataToolException
      */
-    public void setRoleForInput(String identificationNumber)
+    public boolean setRoleForInput(String identificationNumber)
         throws DataToolException
     {
         LOG.debug("Try to find role for following identification number: " + identificationNumber);
@@ -177,7 +178,10 @@ public class UniversityData
         {
             AlertDialog.startDialog(AlertType.WARNING, "Identification number does not exist.",
                     "The given indentification number '" + identificationNumber + "' does not exist in database.");
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -243,13 +247,24 @@ public class UniversityData
     {
         LOG.info("Get all views for current role.");
 
-        String query = "SHOW FULL TABLES IN " + Constants.DATABASE_NAME + " WHERE TABLE_TYPE LIKE 'VIEW'";
+        String databaseName;
+        try
+        {
+            databaseName = databaseConnection.getCatalog();
+        }
+        catch (SQLException e)
+        {
+            throw new DataToolException("Error while getting database name.", e);
+        }
+
+        String query = "SHOW FULL TABLES IN " + databaseName + " WHERE TABLE_TYPE LIKE 'VIEW'";
         LOG.debug("Execute for views: " + query);
         List<String> views = new ArrayList<>();
         try (PreparedStatement stmt = databaseConnection.prepareStatement(query);
                 ResultSet result = stmt.executeQuery())
         {
-            while(result.next())
+            result.beforeFirst();
+            while (result.next())
             {
                 views.add(result.getString(1));
             }
@@ -261,5 +276,15 @@ public class UniversityData
 
         LOG.info("Views for current role.");
         return views;
+    }
+
+    /**
+     * get database connection 
+     * 
+     * @return
+     */
+    public Connection getDatabaseConnection()
+    {
+        return databaseConnection;
     }
 }

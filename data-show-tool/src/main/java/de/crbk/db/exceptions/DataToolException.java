@@ -6,6 +6,11 @@ package de.crbk.db.exceptions;
 public class DataToolException extends Exception
 {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1563606820674428228L;
+
     public DataToolException()
     {
         super();
