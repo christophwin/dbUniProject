@@ -134,33 +134,10 @@ public class UserMainInterface extends Application
                 TableColumn<Map<String, String>, String> currColumnView = new TableColumn<>(columnName);
                 currColumnView.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(columnName)));
 
-                currColumnView.setCellFactory(
-                        new Callback<TableColumn<Map<String, String>, String>, TableCell<Map<String, String>, String>>()
-                        {
-                            @Override
-                            public TableCell<Map<String, String>, String> call(
-                                    javafx.scene.control.TableColumn<Map<String, String>, String> param)
-                            {
-                                return new TextFieldTableCell<Map<String, String>, String>(
-                                        new StringConverter<String>()
-                                        {
-
-                                            @Override
-                                            public String fromString(String string)
-                                            {
-                                                return string;
-                                            }
-
-                                            @Override
-                                            public String toString(String object)
-                                            {
-                                                return object;
-                                            }
-
-                                        });
-                            };
-                        });
-
+                currColumnView.setEditable(true); //TODO test
+                
+                currColumnView.setCellFactory(new CustomCellFactory());
+                
                 table.getColumns().add(currColumnView);
             }
 
