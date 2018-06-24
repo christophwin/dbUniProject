@@ -1,5 +1,6 @@
 package de.crbk.db.ui;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,6 +18,7 @@ import de.crbk.db.common.Constants;
 import de.crbk.db.controller.UniversityData;
 import de.crbk.db.exceptions.DataToolException;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -29,6 +31,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -58,6 +61,8 @@ public class UserMainInterface extends Application
     private ScrollPane tableScrollPane;
 
     private String selectedView;
+
+    private TableView<Map<String, String>> shownTable;
 
     @Override
     public void start(Stage primaryStage)
@@ -124,7 +129,7 @@ public class UserMainInterface extends Application
                 ResultSet result = stmt.executeQuery())
         {
 
-            TableView<Map<String, String>> table = new TableView<>(generateValueForView(result));
+            shownTable = new TableView<>(generateValueForView(result));
 
             for (int i = 1; i <= result.getMetaData().getColumnCount(); i++)
             {
@@ -134,14 +139,15 @@ public class UserMainInterface extends Application
                 TableColumn<Map<String, String>, String> currColumnView = new TableColumn<>(columnName);
                 currColumnView.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(columnName)));
 
-                currColumnView.setEditable(true); //TODO test
-                
                 currColumnView.setCellFactory(new CustomCellFactory());
-                
-                table.getColumns().add(currColumnView);
+
+                shownTable.getColumns().add(currColumnView);
             }
 
-            this.tableScrollPane.setContent(table);
+            // set selection mode to to single mode --> multi selection is now disabled
+            shownTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+            this.tableScrollPane.setContent(shownTable);
 
         }
         catch (SQLException e)
@@ -184,4 +190,55 @@ public class UserMainInterface extends Application
         return values;
     }
 
+    /**
+     * executed if button for change was clicked
+     */
+    @FXML
+    private void changeClick()
+    {
+        LOG.info("Change was clicked. Call dialog.");
+
+        if (shownTable == null || shownTable.getSelectionModel().isEmpty()
+                || shownTable.getSelectionModel().getSelectedItem() == null)
+        {
+            LOG.info("No row was selected.");
+            AlertDialog.startDialog(AlertType.INFORMATION, "Please select a row to edit it", "No row was selected");
+            return;
+        }
+        Stage stage = new Stage();
+
+        FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Constants.EDITFRAME_FXML));
+
+        UserEditDialog controller = new UserEditDialog();
+        controller.setSelectedRow(shownTable.getSelectionModel().getSelectedItem());
+        controller.setSelectedView(selectedView);
+        loader.setController(controller);
+
+        try
+        {
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("Edit data");
+            stage.show();
+        }
+        catch (IOException e)
+        {
+            LOG.error(e.getMessage(), e);
+            AlertDialog.startDialog(AlertType.ERROR, "Error while starting dialog.",
+                    "Look at stack trace for more information.", e);
+        }
+    }
+
+    @FXML
+    private void insertClick()
+    {
+        
+    }
+    
+    @FXML
+    private void deleteClick()
+    {
+        
+    }
 }

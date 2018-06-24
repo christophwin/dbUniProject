@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="380.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
+  <content>
+    <AnchorPane prefHeight="369.0" prefWidth="360.0">
+         <children>
+            <VBox fx:id="fieldsVBox" layoutX="3.0" layoutY="-1.0" prefHeight="289.0" prefWidth="242.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="166.0" AnchorPane.topAnchor="80.0" />
+            <Button layoutX="48.0" layoutY="14.0" mnemonicParsing="false" onAction="#saveClicked" prefHeight="25.0" prefWidth="280.0" text="Speichern" />
+         </children></AnchorPane>
+  </content>
+</ScrollPane>
