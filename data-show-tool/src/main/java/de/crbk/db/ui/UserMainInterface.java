@@ -15,6 +15,8 @@ import java.util.ResourceBundle;
 import org.apache.log4j.Logger;
 
 import de.crbk.db.common.Constants;
+import de.crbk.db.common.DatabaseRoles;
+import de.crbk.db.common.DatabaseUserTables;
 import de.crbk.db.controller.UniversityData;
 import de.crbk.db.exceptions.DataToolException;
 import javafx.application.Application;
@@ -47,7 +49,8 @@ import javafx.util.StringConverter;
 /**
  * Implementation of the main user interface
  */
-public class UserMainInterface extends Application
+public class UserMainInterface
+    extends Application
 {
     private static final Logger LOG = Logger.getLogger(UserMainInterface.class);
 
@@ -61,6 +64,8 @@ public class UserMainInterface extends Application
     private ScrollPane tableScrollPane;
 
     private String selectedView;
+
+    private String currentRole;
 
     private TableView<Map<String, String>> shownTable;
 
@@ -89,7 +94,7 @@ public class UserMainInterface extends Application
         {
             LOG.info("No data input.");
             AlertDialog.startDialog(AlertType.WARNING, "No input given.",
-                    "The identification number has to be filled.");
+                                    "The identification number has to be filled.");
             return;
         }
         try
@@ -100,8 +105,8 @@ public class UserMainInterface extends Application
                 return;
             }
 
-            ObservableList<String> viewsForRole = FXCollections
-                    .observableArrayList(UniversityData.getInstance().getAllViews());
+            ObservableList<String> viewsForRole =
+                FXCollections.observableArrayList(UniversityData.getInstance().getAllViews());
             this.resultListView.setItems(viewsForRole);
 
         }
@@ -109,7 +114,7 @@ public class UserMainInterface extends Application
         {
             LOG.error(e.getMessage(), e);
             AlertDialog.startDialog(AlertType.ERROR, "An error occur while database connection.",
-                    "See stack trace for details.", e);
+                                    "See stack trace for details.", e);
         }
     }
 
@@ -126,7 +131,7 @@ public class UserMainInterface extends Application
         LOG.debug("Exceute SQL-query: " + query);
 
         try (PreparedStatement stmt = UniversityData.getInstance().getDatabaseConnection().prepareStatement(query);
-                ResultSet result = stmt.executeQuery())
+                        ResultSet result = stmt.executeQuery())
         {
 
             shownTable = new TableView<>(generateValueForView(result));
@@ -137,6 +142,13 @@ public class UserMainInterface extends Application
                 LOG.debug("Create column view for following column: " + columnName);
 
                 TableColumn<Map<String, String>, String> currColumnView = new TableColumn<>(columnName);
+                
+                if(columnName.equals(DatabaseUserTables.ID_COLUMN) && !currentRole.equals(DatabaseRoles.ADMIN_EMPLOYEE))
+                {
+                    LOG.debug("Set ID column invisible");
+                    currColumnView.setVisible(false);
+                }
+                
                 currColumnView.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(columnName)));
 
                 currColumnView.setCellFactory(new CustomCellFactory());
@@ -153,7 +165,7 @@ public class UserMainInterface extends Application
         catch (SQLException e)
         {
             AlertDialog.startDialog(AlertType.ERROR, "Connot open view.",
-                    "Cannot load follwing view from database. View: " + selectedView, e);
+                                    "Cannot load follwing view from database. View: " + selectedView, e);
             LOG.error("Error while loading view.", e);
         }
     }
@@ -161,10 +173,8 @@ public class UserMainInterface extends Application
     /**
      * generates a list which include a map for every resultset row
      * 
-     * @param resultSet
-     *            resultset with all values
-     * @param columnNames
-     *            column names like in the resultSet
+     * @param resultSet resultset with all values
+     * @param columnNames column names like in the resultSet
      * @return
      * @throws SQLException
      */
@@ -199,7 +209,7 @@ public class UserMainInterface extends Application
         LOG.info("Change was clicked. Call dialog.");
 
         if (shownTable == null || shownTable.getSelectionModel().isEmpty()
-                || shownTable.getSelectionModel().getSelectedItem() == null)
+            || shownTable.getSelectionModel().getSelectedItem() == null)
         {
             LOG.info("No row was selected.");
             AlertDialog.startDialog(AlertType.INFORMATION, "Please select a row to edit it", "No row was selected");
@@ -226,19 +236,19 @@ public class UserMainInterface extends Application
         {
             LOG.error(e.getMessage(), e);
             AlertDialog.startDialog(AlertType.ERROR, "Error while starting dialog.",
-                    "Look at stack trace for more information.", e);
+                                    "Look at stack trace for more information.", e);
         }
     }
 
     @FXML
     private void insertClick()
     {
-        
+
     }
-    
+
     @FXML
     private void deleteClick()
     {
-        
+
     }
 }

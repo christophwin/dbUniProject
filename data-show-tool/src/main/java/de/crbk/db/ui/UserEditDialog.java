@@ -8,6 +8,8 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
+import de.crbk.db.common.DatabaseRoles;
+import de.crbk.db.common.DatabaseUserTables;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.transformation.FilteredList;
@@ -22,15 +24,18 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
 
-public class UserEditDialog implements Initializable
+public class UserEditDialog
+    implements Initializable
 {
     private static final Logger LOG = Logger.getLogger(UserEditDialog.class);
+
+    private String selectedView;
+
+    private String currentRole;
 
     private Map<String, String> selectedRow;
 
     private Map<String, String> changedValues = new HashMap<>();
-
-    private String selectedView;
 
     @FXML
     private VBox fieldsVBox;
@@ -42,7 +47,7 @@ public class UserEditDialog implements Initializable
         if (this.selectedRow == null)
         {
             AlertDialog.startDialog(AlertType.ERROR, "The selected row is not valid.",
-                    "Plese close this view and try again.");
+                                    "Plese close this view and try again.");
             return;
         }
 
@@ -54,6 +59,11 @@ public class UserEditDialog implements Initializable
             TextField txtField = new TextField();
             txtField.setId(currCol.getKey());
             txtField.setText(currCol.getValue());
+            if (currCol.getKey().equals(DatabaseUserTables.ID_COLUMN) && !currentRole.equals(DatabaseRoles.ADMIN_EMPLOYEE))
+            {
+                LOG.debug("Set ID text field to disable.");
+                txtField.setDisable(true);
+            }
             fieldsVBox.getChildren().add(txtField);
 
         }
@@ -69,12 +79,19 @@ public class UserEditDialog implements Initializable
         this.selectedView = selectedView;
     }
 
+    public void setCurrentRole(String selectedRole)
+    {
+        this.currentRole = selectedRole;
+    }
+    
     @FXML
     private void saveClicked(ActionEvent event)
     {
         LOG.info("Save Button was clicked.");
         FilteredList<Node> textFields = fieldsVBox.getChildren().filtered(curr -> curr instanceof TextField);
-        
+
     }
+
+    
 
 }
