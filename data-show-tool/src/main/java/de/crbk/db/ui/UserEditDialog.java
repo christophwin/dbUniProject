@@ -54,16 +54,19 @@ public class UserEditDialog
         for (Map.Entry<String, String> currCol : selectedRow.entrySet())
         {
             LOG.debug("Current collum for creation: " + currCol);
+            if (currCol.getKey().equals(DatabaseUserTables.ID_COLUMN)
+                && !currentRole.equals(DatabaseRoles.ADMIN_EMPLOYEE))
+            {
+                LOG.debug("ID will not be shown for this user.");
+                continue;
+            }
+
             fieldsVBox.getChildren().add(new Label(currCol.getKey() + ":"));
 
             TextField txtField = new TextField();
             txtField.setId(currCol.getKey());
             txtField.setText(currCol.getValue());
-            if (currCol.getKey().equals(DatabaseUserTables.ID_COLUMN) && !currentRole.equals(DatabaseRoles.ADMIN_EMPLOYEE))
-            {
-                LOG.debug("Set ID text field to disable.");
-                txtField.setDisable(true);
-            }
+
             fieldsVBox.getChildren().add(txtField);
 
         }
@@ -83,7 +86,7 @@ public class UserEditDialog
     {
         this.currentRole = selectedRole;
     }
-    
+
     @FXML
     private void saveClicked(ActionEvent event)
     {
@@ -91,7 +94,5 @@ public class UserEditDialog
         FilteredList<Node> textFields = fieldsVBox.getChildren().filtered(curr -> curr instanceof TextField);
 
     }
-
-    
 
 }
