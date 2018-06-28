@@ -37,6 +37,8 @@ public class UniversityData
 
     private Connection databaseConnection = null;
 
+    private String currentRole;
+
     /**
      * start method
      * 
@@ -234,6 +236,7 @@ public class UniversityData
         {
             throw new DataToolException("Error while setting role for current session.", e);
         }
+        this.currentRole = role;
     }
 
     /**
@@ -279,12 +282,37 @@ public class UniversityData
     }
 
     /**
-     * get database connection 
+     * execute SQL statement without result
+     * 
+     * @param statement
+     *            SQL statement
+     * @throws SQLException
+     *             thrown if exception occurs
+     */
+    public void executeSqlStatement(String statement)
+        throws SQLException
+    {
+        LOG.info("Execute following SQL-statement: " + statement);
+        try (PreparedStatement stmt = databaseConnection.prepareStatement(statement))
+        {
+            stmt.execute();
+        }
+        databaseConnection.commit();
+        LOG.debug("SQL executed successful.");
+    }
+
+    /**
+     * get database connection
      * 
      * @return
      */
     public Connection getDatabaseConnection()
     {
         return databaseConnection;
+    }
+
+    public String getCurrentRole()
+    {
+        return currentRole;
     }
 }

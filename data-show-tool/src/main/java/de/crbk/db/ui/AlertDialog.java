@@ -25,17 +25,20 @@ public class AlertDialog
 
     public static void startDialog(AlertType type, String header, String content, Exception exception)
     {
-        Platform.runLater(() -> {
+        Platform.runLater(() ->
+        {
             Alert dlg = new Alert(type);
             dlg.setHeaderText(header.toUpperCase());
             dlg.setContentText(content);
 
-            dlg.getDialogPane().setOnMousePressed(event -> {
+            dlg.getDialogPane().setOnMousePressed(event ->
+            {
                 xOffset = dlg.getX() - event.getScreenX();
                 yOffset = dlg.getY() - event.getScreenY();
             });
 
-            dlg.getDialogPane().setOnMouseDragged(event -> {
+            dlg.getDialogPane().setOnMouseDragged(event ->
+            {
                 dlg.setX(event.getScreenX() + xOffset);
                 dlg.setY(event.getScreenY() + yOffset);
             });

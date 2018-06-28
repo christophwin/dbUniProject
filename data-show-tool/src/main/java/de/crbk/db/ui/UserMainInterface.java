@@ -1,16 +1,11 @@
 package de.crbk.db.ui;
 
 import java.io.IOException;
-import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
@@ -20,37 +15,26 @@ import de.crbk.db.common.DatabaseUserTables;
 import de.crbk.db.controller.UniversityData;
 import de.crbk.db.exceptions.DataToolException;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArrayBase;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.TableColumn.CellDataFeatures;
-import javafx.scene.control.cell.MapValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import javafx.util.Callback;
-import javafx.util.StringConverter;
 
 /**
  * Implementation of the main user interface
  */
-public class UserMainInterface
-    extends Application
+public class UserMainInterface extends Application
 {
     private static final Logger LOG = Logger.getLogger(UserMainInterface.class);
 
@@ -64,8 +48,6 @@ public class UserMainInterface
     private ScrollPane tableScrollPane;
 
     private String selectedView;
-
-    private String currentRole;
 
     private TableView<Map<String, String>> shownTable;
 
@@ -94,19 +76,26 @@ public class UserMainInterface
         {
             LOG.info("No data input.");
             AlertDialog.startDialog(AlertType.WARNING, "No input given.",
-                                    "The identification number has to be filled.");
+                    "The identification number has to be filled.");
             return;
         }
         try
         {
+            if (shownTable != null)
+            {
+                LOG.info("Remove old table view.");
+                this.tableScrollPane.setContent(null);
+                this.shownTable = null;
+            }
+
             UniversityData.getInstance().createDatabaseConnection();
             if (!UniversityData.getInstance().setRoleForInput(identificationField.getText()))
             {
                 return;
             }
 
-            ObservableList<String> viewsForRole =
-                FXCollections.observableArrayList(UniversityData.getInstance().getAllViews());
+            ObservableList<String> viewsForRole = FXCollections
+                    .observableArrayList(UniversityData.getInstance().getAllViews());
             this.resultListView.setItems(viewsForRole);
 
         }
@@ -114,7 +103,7 @@ public class UserMainInterface
         {
             LOG.error(e.getMessage(), e);
             AlertDialog.startDialog(AlertType.ERROR, "An error occur while database connection.",
-                                    "See stack trace for details.", e);
+                    "See stack trace for details.", e);
         }
     }
 
@@ -122,7 +111,7 @@ public class UserMainInterface
      * view selected
      */
     @FXML
-    private void viewSelected()
+    public void viewSelected()
     {
         LOG.info("Following view was selected: " + resultListView.selectionModelProperty().getName());
         selectedView = resultListView.getSelectionModel().getSelectedItem();
@@ -131,7 +120,7 @@ public class UserMainInterface
         LOG.debug("Exceute SQL-query: " + query);
 
         try (PreparedStatement stmt = UniversityData.getInstance().getDatabaseConnection().prepareStatement(query);
-                        ResultSet result = stmt.executeQuery())
+                ResultSet result = stmt.executeQuery())
         {
 
             shownTable = new TableView<>(generateValueForView(result));
@@ -142,13 +131,14 @@ public class UserMainInterface
                 LOG.debug("Create column view for following column: " + columnName);
 
                 TableColumn<Map<String, String>, String> currColumnView = new TableColumn<>(columnName);
-                
-                if(columnName.equals(DatabaseUserTables.ID_COLUMN) && !currentRole.equals(DatabaseRoles.ADMIN_EMPLOYEE))
+
+                if (columnName.startsWith(DatabaseUserTables.ID_COLUMN)
+                        && !UniversityData.getInstance().getCurrentRole().equals(DatabaseRoles.ADMIN_EMPLOYEE))
                 {
                     LOG.debug("Set ID column invisible");
                     currColumnView.setVisible(false);
                 }
-                
+
                 currColumnView.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(columnName)));
 
                 currColumnView.setCellFactory(new CustomCellFactory());
@@ -165,7 +155,7 @@ public class UserMainInterface
         catch (SQLException e)
         {
             AlertDialog.startDialog(AlertType.ERROR, "Connot open view.",
-                                    "Cannot load follwing view from database. View: " + selectedView, e);
+                    "Cannot load follwing view from database. View: " + selectedView, e);
             LOG.error("Error while loading view.", e);
         }
     }
@@ -173,8 +163,10 @@ public class UserMainInterface
     /**
      * generates a list which include a map for every resultset row
      * 
-     * @param resultSet resultset with all values
-     * @param columnNames column names like in the resultSet
+     * @param resultSet
+     *            resultset with all values
+     * @param columnNames
+     *            column names like in the resultSet
      * @return
      * @throws SQLException
      */
@@ -207,21 +199,33 @@ public class UserMainInterface
     private void changeClick()
     {
         LOG.info("Change was clicked. Call dialog.");
-
         if (shownTable == null || shownTable.getSelectionModel().isEmpty()
-            || shownTable.getSelectionModel().getSelectedItem() == null)
+                || shownTable.getSelectionModel().getSelectedItem() == null)
         {
             LOG.info("No row was selected.");
             AlertDialog.startDialog(AlertType.INFORMATION, "Please select a row to edit it", "No row was selected");
             return;
         }
+        startEditDialog(true, shownTable.getSelectionModel().getSelectedItem());
+    }
+
+    /**
+     * starts the edit dialog
+     * 
+     * @param isUpdate
+     *            set if the started dialog is for insert or not
+     */
+    private void startEditDialog(boolean isUpdate, Map<String, String> values)
+    {
         Stage stage = new Stage();
 
         FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Constants.EDITFRAME_FXML));
 
         UserEditDialog controller = new UserEditDialog();
-        controller.setSelectedRow(shownTable.getSelectionModel().getSelectedItem());
-        controller.setSelectedView(selectedView);
+        controller.setSelectedRow(values);
+        controller.setView(selectedView);
+        controller.setUpdate(isUpdate);
+        controller.setMainInterface(this);
         loader.setController(controller);
 
         try
@@ -236,19 +240,40 @@ public class UserMainInterface
         {
             LOG.error(e.getMessage(), e);
             AlertDialog.startDialog(AlertType.ERROR, "Error while starting dialog.",
-                                    "Look at stack trace for more information.", e);
+                    "Look at stack trace for more information.", e);
         }
     }
 
     @FXML
     private void insertClick()
     {
+        LOG.info("Insert was clicked. Start dialog.");
+        if (shownTable == null)
+        {
+            AlertDialog.startDialog(AlertType.INFORMATION, "An view must be selected.", "Select a view.");
+            return;
+        }
+        startEditDialog(false, createColumnMap());
+    }
 
+    /**
+     * create a map with all colunms but with empty values
+     * 
+     * @return
+     */
+    private Map<String, String> createColumnMap()
+    {
+        Map<String, String> result = new HashMap<>();
+        for (TableColumn<Map<String, String>, ?> curr : shownTable.getColumns())
+        {
+            result.put(curr.getText(), null);
+        }
+        return result;
     }
 
     @FXML
     private void deleteClick()
     {
-
+        // TODO
     }
 }
