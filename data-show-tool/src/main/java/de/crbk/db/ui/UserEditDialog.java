@@ -99,11 +99,15 @@ public class UserEditDialog implements Initializable
                 else
                 {
                     LOG.info("No update needed.");
+                   
                 }
             }
             else
             {
-                // TODO
+                LOG.debug("Create an insert statement.");
+                Map<String, String> columnsToInsert = getUpdateValues(textFields);
+                LOG.debug("Insert columns: " + columnsToInsert);
+                UniversityData.getInstance().executeSqlStatement(createInsertStatement(columnsToInsert));
             }
         }
         catch (Exception e)
@@ -114,6 +118,44 @@ public class UserEditDialog implements Initializable
         }
         mainInterface.viewSelected();
         ((Stage) ((Node) event.getTarget()).getScene().getWindow()).close();
+    }
+
+    /**
+     * creates an insert statement for database
+     * 
+     * @param columnsToInsert
+     * @return 
+     */
+    private String createInsertStatement(Map<String, String> columnsToInsert)
+    {
+        LOG.debug("Create insert statement.");
+        
+        StringBuilder columns = new StringBuilder();
+        StringBuilder values = new StringBuilder();
+        boolean first = true;
+        for(Map.Entry<String, String> currEntry : columnsToInsert.entrySet())
+        {
+            if(first)
+            {
+                first = false;
+            }
+            else
+            {
+                columns.append(", ");
+                values.append(", ");
+            }
+            
+            columns.append(currEntry.getKey());
+            values.append("'").append(currEntry.getValue()).append("'");
+        }
+        
+        StringBuilder sb = new StringBuilder("INSERT INTO ");
+        sb.append(view).append(" (");
+        sb.append(columns).append(") ");
+        sb.append(" VALUES (");
+        sb.append(values).append(")");
+
+        return sb.toString();
     }
 
     /**
