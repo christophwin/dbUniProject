@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
 
@@ -34,7 +35,8 @@ import javafx.stage.Stage;
 /**
  * Implementation of the main user interface
  */
-public class UserMainInterface extends Application
+public class UserMainInterface
+    extends Application
 {
     private static final Logger LOG = Logger.getLogger(UserMainInterface.class);
 
@@ -76,7 +78,7 @@ public class UserMainInterface extends Application
         {
             LOG.info("No data input.");
             AlertDialog.startDialog(AlertType.WARNING, "No input given.",
-                    "The identification number has to be filled.");
+                                    "The identification number has to be filled.");
             return;
         }
         try
@@ -94,8 +96,8 @@ public class UserMainInterface extends Application
                 return;
             }
 
-            ObservableList<String> viewsForRole = FXCollections
-                    .observableArrayList(UniversityData.getInstance().getAllViews());
+            ObservableList<String> viewsForRole =
+                FXCollections.observableArrayList(UniversityData.getInstance().getAllViews());
             this.resultListView.setItems(viewsForRole);
 
         }
@@ -103,7 +105,7 @@ public class UserMainInterface extends Application
         {
             LOG.error(e.getMessage(), e);
             AlertDialog.startDialog(AlertType.ERROR, "An error occur while database connection.",
-                    "See stack trace for details.", e);
+                                    "See stack trace for details.", e);
         }
     }
 
@@ -120,7 +122,7 @@ public class UserMainInterface extends Application
         LOG.debug("Exceute SQL-query: " + query);
 
         try (PreparedStatement stmt = UniversityData.getInstance().getDatabaseConnection().prepareStatement(query);
-                ResultSet result = stmt.executeQuery())
+                        ResultSet result = stmt.executeQuery())
         {
 
             shownTable = new TableView<>(generateValueForView(result));
@@ -133,7 +135,7 @@ public class UserMainInterface extends Application
                 TableColumn<Map<String, String>, String> currColumnView = new TableColumn<>(columnName);
 
                 if (columnName.startsWith(DatabaseUserTables.ID_COLUMN)
-                        && !UniversityData.getInstance().getCurrentRole().equals(DatabaseRoles.ADMIN_EMPLOYEE))
+                    && !UniversityData.getInstance().getCurrentRole().equals(DatabaseRoles.ADMIN_EMPLOYEE))
                 {
                     LOG.debug("Set ID column invisible");
                     currColumnView.setVisible(false);
@@ -155,7 +157,7 @@ public class UserMainInterface extends Application
         catch (SQLException e)
         {
             AlertDialog.startDialog(AlertType.ERROR, "Connot open view.",
-                    "Cannot load follwing view from database. View: " + selectedView, e);
+                                    "Cannot load follwing view from database. View: " + selectedView, e);
             LOG.error("Error while loading view.", e);
         }
     }
@@ -163,10 +165,8 @@ public class UserMainInterface extends Application
     /**
      * generates a list which include a map for every resultset row
      * 
-     * @param resultSet
-     *            resultset with all values
-     * @param columnNames
-     *            column names like in the resultSet
+     * @param resultSet resultset with all values
+     * @param columnNames column names like in the resultSet
      * @return
      * @throws SQLException
      */
@@ -200,7 +200,7 @@ public class UserMainInterface extends Application
     {
         LOG.info("Change was clicked. Call dialog.");
         if (shownTable == null || shownTable.getSelectionModel().isEmpty()
-                || shownTable.getSelectionModel().getSelectedItem() == null)
+            || shownTable.getSelectionModel().getSelectedItem() == null)
         {
             LOG.info("No row was selected.");
             AlertDialog.startDialog(AlertType.INFORMATION, "Please select a row to edit it", "No row was selected");
@@ -212,8 +212,7 @@ public class UserMainInterface extends Application
     /**
      * starts the edit dialog
      * 
-     * @param isUpdate
-     *            set if the started dialog is for insert or not
+     * @param isUpdate set if the started dialog is for insert or not
      */
     private void startEditDialog(boolean isUpdate, Map<String, String> values)
     {
@@ -240,7 +239,7 @@ public class UserMainInterface extends Application
         {
             LOG.error(e.getMessage(), e);
             AlertDialog.startDialog(AlertType.ERROR, "Error while starting dialog.",
-                    "Look at stack trace for more information.", e);
+                                    "Look at stack trace for more information.", e);
         }
     }
 
@@ -271,9 +270,54 @@ public class UserMainInterface extends Application
         return result;
     }
 
+    /**
+     * executed if delete button was clicked
+     */
     @FXML
     private void deleteClick()
     {
-        // TODO
+        LOG.info("Delete clicked.");
+        if (shownTable == null || shownTable.getSelectionModel().isEmpty()
+            || shownTable.getSelectionModel().getSelectedItem() == null)
+        {
+            LOG.info("No row was selected.");
+            AlertDialog.startDialog(AlertType.INFORMATION, "Please select a row to delete it.", "No row was selected");
+            return;
+        }
+
+        Map<String, String> selectedRow = shownTable.getSelectionModel().getSelectedItem();
+
+        StringBuilder query = new StringBuilder("DELETE FROM ");
+        query.append(selectedView);
+        query.append(" WHERE ");
+
+        AtomicBoolean first = new AtomicBoolean(true);
+        selectedRow.forEach((key, value) -> {
+            if (key.startsWith(DatabaseUserTables.ID_COLUMN))
+            {
+                if (first.get())
+                {
+                    first.set(false);
+                }
+                else
+                {
+                    query.append(" AND ");
+                }
+                query.append(key);
+                query.append(" = ");
+                query.append(value);
+            }
+        });
+
+        try
+        {
+            UniversityData.getInstance().executeSqlStatement(query.toString());
+        }
+        catch (Exception e)
+        {
+            LOG.error(e.getMessage(), e);
+            AlertDialog.startDialog(AlertType.ERROR, "Error while delete row.",
+                                    "Please try again or see stack trace for details.", e);
+        }
     }
 }

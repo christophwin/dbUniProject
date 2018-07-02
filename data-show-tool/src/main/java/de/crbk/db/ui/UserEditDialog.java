@@ -99,7 +99,6 @@ public class UserEditDialog implements Initializable
                 else
                 {
                     LOG.info("No update needed.");
-                   
                 }
             }
             else
@@ -107,7 +106,14 @@ public class UserEditDialog implements Initializable
                 LOG.debug("Create an insert statement.");
                 Map<String, String> columnsToInsert = getUpdateValues(textFields);
                 LOG.debug("Insert columns: " + columnsToInsert);
-                UniversityData.getInstance().executeSqlStatement(createInsertStatement(columnsToInsert));
+                if(!columnsToInsert.isEmpty())
+                {
+                    UniversityData.getInstance().executeSqlStatement(createInsertStatement(columnsToInsert));    
+                }
+                else
+                {
+                    AlertDialog.startDialog(AlertType.WARNING, "No values given.", "Values must be given for insert.");
+                }
             }
         }
         catch (Exception e)

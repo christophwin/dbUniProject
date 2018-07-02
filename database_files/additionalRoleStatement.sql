@@ -1,0 +1,12 @@
+CREATE ROLE assistant, professor, student, adminEmployee;
+GRANT SELECT, UPDATE ON professorData TO professor;
+GRANT SELECT, UPDATE ON studentData TO student;
+GRANT SELECT, UPDATE ON assistantData TO assistant;
+GRANT ALL ON lecturesView TO adminEmployee;
+GRANT ALL ON adminData TO adminEmployee;
+GRANT ALL ON professorData TO adminEmployee;
+GRANT ALL ON studentData TO adminEmployee;
+GRANT ALL ON assistantData TO adminEmployee;
+GRANT SELECT ON lecturesOfStudent TO student;
+GRANT SELECT ON lecturesOfProfessor TO professor;
+GRANT SELECT ON lecturesOfAssistant TO assistant;
