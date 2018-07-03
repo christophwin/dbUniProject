@@ -1,5 +1,6 @@
 package de.crbk.db.ui;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -48,7 +49,7 @@ public class UserMainInterface extends Application
 
     @FXML
     private ScrollPane tableScrollPane;
-    
+
     @FXML
     private Button btnAdd;
 
@@ -66,7 +67,7 @@ public class UserMainInterface extends Application
     public void start(Stage primaryStage)
         throws Exception
     {
-        Parent root = FXMLLoader.load(this.getClass().getResource(Constants.MAINFRAME_FXML));
+        Parent root = FXMLLoader.load(new File(Constants.MAINFRAME_FXML).toURI().toURL());
 
         Scene scene = new Scene(root, primaryStage.getWidth(), primaryStage.getHeight());
         scene.setRoot(root);
@@ -274,18 +275,17 @@ public class UserMainInterface extends Application
     private void startEditDialog(boolean isUpdate, Map<String, String> values)
     {
         Stage stage = new Stage();
-
-        FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Constants.EDITFRAME_FXML));
-
-        UserEditDialog controller = new UserEditDialog();
-        controller.setSelectedRow(values);
-        controller.setView(selectedView);
-        controller.setUpdate(isUpdate);
-        controller.setMainInterface(this);
-        loader.setController(controller);
-
         try
         {
+            FXMLLoader loader = new FXMLLoader(new File(Constants.EDITFRAME_FXML).toURI().toURL());
+
+            UserEditDialog controller = new UserEditDialog();
+            controller.setSelectedRow(values);
+            controller.setView(selectedView);
+            controller.setUpdate(isUpdate);
+            controller.setMainInterface(this);
+            loader.setController(controller);
+
             Parent root = loader.load();
             Scene scene = new Scene(root);
             stage.setScene(scene);

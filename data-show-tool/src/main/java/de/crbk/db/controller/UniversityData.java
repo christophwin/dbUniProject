@@ -41,6 +41,8 @@ public class UniversityData
 
     private String currentIdentificationNumber;
 
+    private Properties props;
+
     /**
      * start method
      * 
@@ -72,7 +74,9 @@ public class UniversityData
     {
         try
         {
-            DOMConfigurator.configure(this.getClass().getResource(Constants.LOG4J));
+            DOMConfigurator.configure(Constants.LOG4J);
+            props = new Properties();
+            props.load(new FileInputStream(new File(Constants.PROPERTIES_FILE)));
             Application.launch(UserMainInterface.class); // launches the main frame
         }
         catch (Exception e)
@@ -94,17 +98,7 @@ public class UniversityData
     public void createDatabaseConnection()
         throws DataToolException
     {
-        try
-        {
-            Properties props = new Properties();
-            props.load(new FileInputStream(new File(this.getClass().getResource(Constants.PROPERTIES_FILE).toURI())));
-            createDatabaseConnection(props.getProperty(Constants.USER_PROP),
-                    props.getProperty(Constants.PASSWORD_PROP));
-        }
-        catch (IOException | URISyntaxException e)
-        {
-            throw new DataToolException("Error while getting root connection.");
-        }
+        createDatabaseConnection(props.getProperty(Constants.USER_PROP), props.getProperty(Constants.PASSWORD_PROP));
     }
 
     /**
@@ -121,9 +115,6 @@ public class UniversityData
 
         try
         {
-            Properties props = new Properties();
-            props.load(new FileInputStream(new File(this.getClass().getResource(Constants.PROPERTIES_FILE).toURI())));
-
             String connectionUrl = props.getProperty(Constants.DATABASE_URL_PROP);
             LOG.info("URL: " + connectionUrl);
 
@@ -132,7 +123,7 @@ public class UniversityData
             databaseConnection.setAutoCommit(false);
             LOG.info("Database connection is valid: " + databaseConnection.isValid(1000));
         }
-        catch (SQLException | IOException | URISyntaxException e)
+        catch (SQLException e)
         {
             throw new DataToolException("An error occour while creating database connection", e);
         }
