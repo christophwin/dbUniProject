@@ -18,13 +18,17 @@
 	<fileSets>
 		<fileSet>
 			<directory>${basedir}/conf</directory>
-			<includes>
-				<include>*.*</include>
-			</includes>
 			<outputDirectory>conf</outputDirectory>
 		</fileSet>
 		<fileSet>
-			<directory>fonts_fxml</directory>
+			<directory>${basedir}/launcher</directory>
+			<includes>
+				<include>*.exe</include>
+			</includes>
+			<outputDirectory></outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>${basedir}fonts_fxml</directory>
 			<outputDirectory>fonts_fxml</outputDirectory>
 		</fileSet>
 		<fileSet>

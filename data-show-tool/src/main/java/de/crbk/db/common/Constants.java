@@ -16,4 +16,6 @@ public class Constants
 
     public static final String PASSWORD_PROP = "password";
 
+    public static final String DATABASE_ICON = "fonts_fxml/databaseIcon.png";
+
 }

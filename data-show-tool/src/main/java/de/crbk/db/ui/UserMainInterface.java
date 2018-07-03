@@ -1,6 +1,7 @@
 package de.crbk.db.ui;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +26,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
@@ -73,6 +75,7 @@ public class UserMainInterface extends Application
         scene.setRoot(root);
         primaryStage.setScene(scene);
         primaryStage.setTitle("University data");
+        primaryStage.getIcons().add(new Image(new FileInputStream(Constants.DATABASE_ICON)));
         primaryStage.show();
 
     }
@@ -289,6 +292,7 @@ public class UserMainInterface extends Application
             Parent root = loader.load();
             Scene scene = new Scene(root);
             stage.setScene(scene);
+            stage.getIcons().add(new Image(new FileInputStream(Constants.DATABASE_ICON)));
             stage.setTitle("Edit data");
             stage.show();
         }
