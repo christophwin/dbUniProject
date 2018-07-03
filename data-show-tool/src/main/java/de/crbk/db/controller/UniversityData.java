@@ -13,11 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.print.URIException;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import de.crbk.db.common.Constants;
-import de.crbk.db.common.DatabaseRoles;
+import de.crbk.db.common.DatabaseUsers;
 import de.crbk.db.common.DatabaseUserTables;
 import de.crbk.db.exceptions.DataToolException;
 import de.crbk.db.ui.AlertDialog;
@@ -37,7 +39,7 @@ public class UniversityData
 
     private Connection databaseConnection = null;
 
-    private String currentRole;
+    private String currentUser;
 
     /**
      * start method
@@ -85,37 +87,51 @@ public class UniversityData
     }
 
     /**
-     * create the initial database connection <br>
-     * set 'auto-commit' to 'false'
+     * create conection for main user
      * 
      * @throws DataToolException
-     *             if a error occur while connection
      */
     public void createDatabaseConnection()
         throws DataToolException
     {
-        LOG.info("Start to connect to database. Read properties.");
-        Properties props = new Properties();
         try
         {
-            if (databaseConnection != null && databaseConnection.isValid(1000))
-            {
-                LOG.debug("A database connection already exist.");
-                return;
-            }
+            Properties props = new Properties();
+            props.load(new FileInputStream(new File(this.getClass().getResource(Constants.PROPERTIES_FILE).toURI())));
+            createDatabaseConnection(props.getProperty(Constants.USER_PROP),
+                                     props.getProperty(Constants.PASSWORD_PROP));
+        }
+        catch (IOException | URISyntaxException e)
+        {
+            throw new DataToolException("Error while getting root connection.");
+        }
+    }
 
+    /**
+     * create the initial database connection <br>
+     * set 'auto-commit' to 'false'
+     * 
+     * @throws DataToolException if a error occur while connection
+     */
+    public void createDatabaseConnection(String user, String password)
+        throws DataToolException
+    {
+        LOG.info("Start to connect to database. Read properties.");
+
+        try
+        {
+            Properties props = new Properties();
             props.load(new FileInputStream(new File(this.getClass().getResource(Constants.PROPERTIES_FILE).toURI())));
 
             String connectionUrl = props.getProperty(Constants.DATABASE_URL_PROP);
             LOG.info("URL: " + connectionUrl);
 
-            databaseConnection = DriverManager.getConnection(connectionUrl, props.getProperty(Constants.USER_PROP),
-                    props.getProperty(Constants.PASSWORD_PROP));
-
+            databaseConnection = DriverManager.getConnection(connectionUrl, user, password);
+            
             databaseConnection.setAutoCommit(false);
             LOG.info("Database connection is valid: " + databaseConnection.isValid(1000));
         }
-        catch (IOException | URISyntaxException | SQLException e)
+        catch (SQLException | IOException | URISyntaxException e)
         {
             throw new DataToolException("An error occour while creating database connection", e);
         }
@@ -143,43 +159,43 @@ public class UniversityData
     }
 
     /**
-     * checks if the given identification number is given in one of the user tables
-     * <br>
+     * checks if the given identification number is given in one of the user tables <br>
      * set right role for this session
      * 
      * @param identificationNumber
      * @return true -> number is known false -> number is nor known
      * @throws DataToolException
      */
-    public boolean setRoleForInput(String identificationNumber)
+    public boolean setUserForInput(String identificationNumber)
         throws DataToolException
     {
         LOG.debug("Try to find role for following identification number: " + identificationNumber);
 
         if (existInTable(DatabaseUserTables.ASSISTANT_TABLE, identificationNumber))
         {
-            setRoleForSession(DatabaseRoles.ASSISTANT);
-            LOG.info("Role set to: " + DatabaseRoles.ASSISTANT);
+            setUser(DatabaseUsers.ASSISTANT);
+            LOG.info("User set to: " + DatabaseUsers.ASSISTANT);
         }
         else if (existInTable(DatabaseUserTables.PROFESSOR_TABLE, identificationNumber))
         {
-            setRoleForSession(DatabaseRoles.PROFESSOR);
-            LOG.info("Role set to: " + DatabaseRoles.PROFESSOR);
+            setUser(DatabaseUsers.PROFESSOR);
+            LOG.info("User set to: " + DatabaseUsers.PROFESSOR);
         }
         else if (existInTable(DatabaseUserTables.STUDENT_TABLE, identificationNumber))
         {
-            setRoleForSession(DatabaseRoles.STUDENT);
-            LOG.info("Role set to: " + DatabaseRoles.STUDENT);
+            setUser(DatabaseUsers.STUDENT);
+            LOG.info("User set to: " + DatabaseUsers.STUDENT);
         }
         else if (existInTable(DatabaseUserTables.ADMIN_EMPLOYEES_TABLE, identificationNumber))
         {
-            setRoleForSession(DatabaseRoles.ADMIN_EMPLOYEE);
-            LOG.info("Role set to: " + DatabaseRoles.ADMIN_EMPLOYEE);
+            setUser(DatabaseUsers.ADMIN_EMPLOYEE);
+            LOG.info("User set to: " + DatabaseUsers.ADMIN_EMPLOYEE);
         }
         else
         {
             AlertDialog.startDialog(AlertType.WARNING, "Identification number does not exist.",
-                    "The given indentification number '" + identificationNumber + "' does not exist in database.");
+                                    "The given indentification number '" + identificationNumber
+                                        + "' does not exist in database.");
             return false;
         }
 
@@ -197,46 +213,36 @@ public class UniversityData
     private boolean existInTable(String table, String identificationNumber)
         throws DataToolException
     {
-        String statement = "SELECT * FROM " + table + " WHERE " + DatabaseUserTables.ID_COLUMN + " = '"
-                + identificationNumber + "'";
+        String statement =
+            "SELECT * FROM " + table + " WHERE " + DatabaseUserTables.ID_COLUMN + " = '" + identificationNumber + "'";
 
         LOG.debug("Execute following statement: " + statement);
 
         try (PreparedStatement stmt = databaseConnection.prepareStatement(statement);
-                ResultSet result = stmt.executeQuery())
+                        ResultSet result = stmt.executeQuery())
         {
             return result.next();
         }
         catch (SQLException e)
         {
             throw new DataToolException("Error occur while checking if currnet identification number '"
-                    + identificationNumber + "' exist in following table '" + table + "'.", e);
+                + identificationNumber + "' exist in following table '" + table + "'.", e);
         }
     }
 
     /**
      * set given role for session
      * 
-     * @param role
+     * @param user
      * @throws DataToolException
      */
-    private void setRoleForSession(String role)
+    private void setUser(String user)
         throws DataToolException
     {
-        LOG.info("Set following role for current session: " + role);
-
-        String statement = "SET ROLE '" + role + "'";
-
-        LOG.debug("Execute following statement: " + statement);
-        try (PreparedStatement stmt = databaseConnection.prepareStatement(statement))
-        {
-            stmt.execute();
-        }
-        catch (SQLException e)
-        {
-            throw new DataToolException("Error while setting role for current session.", e);
-        }
-        this.currentRole = role;
+        LOG.info("Set following user for current session: " + user);
+        closeDatabaseConnection();
+        createDatabaseConnection(user, user);
+        this.currentUser = user;
     }
 
     /**
@@ -248,7 +254,7 @@ public class UniversityData
     public List<String> getAllViews()
         throws DataToolException
     {
-        LOG.info("Get all views for current role.");
+        LOG.info("Get all views for current user.");
 
         String databaseName;
         try
@@ -264,7 +270,7 @@ public class UniversityData
         LOG.debug("Execute for views: " + query);
         List<String> views = new ArrayList<>();
         try (PreparedStatement stmt = databaseConnection.prepareStatement(query);
-                ResultSet result = stmt.executeQuery())
+                        ResultSet result = stmt.executeQuery())
         {
             result.beforeFirst();
             while (result.next())
@@ -284,10 +290,8 @@ public class UniversityData
     /**
      * execute SQL statement without result
      * 
-     * @param statement
-     *            SQL statement
-     * @throws SQLException
-     *             thrown if exception occurs
+     * @param statement SQL statement
+     * @throws SQLException thrown if exception occurs
      */
     public void executeSqlStatement(String statement)
         throws SQLException
@@ -313,6 +317,6 @@ public class UniversityData
 
     public String getCurrentRole()
     {
-        return currentRole;
+        return currentUser;
     }
 }

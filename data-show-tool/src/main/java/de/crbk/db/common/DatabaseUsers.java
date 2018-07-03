@@ -1,6 +1,6 @@
 package de.crbk.db.common;
 
-public class DatabaseRoles
+public class DatabaseUsers
 {
     public static final String ASSISTANT = "assistant";
 

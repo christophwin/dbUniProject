@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.log4j.Logger;
 
 import de.crbk.db.common.Constants;
-import de.crbk.db.common.DatabaseRoles;
+import de.crbk.db.common.DatabaseUsers;
 import de.crbk.db.common.DatabaseUserTables;
 import de.crbk.db.controller.UniversityData;
 import de.crbk.db.exceptions.DataToolException;
@@ -30,6 +30,8 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
@@ -91,7 +93,7 @@ public class UserMainInterface
             }
 
             UniversityData.getInstance().createDatabaseConnection();
-            if (!UniversityData.getInstance().setRoleForInput(identificationField.getText()))
+            if (!UniversityData.getInstance().setUserForInput(identificationField.getText()))
             {
                 return;
             }
@@ -135,7 +137,7 @@ public class UserMainInterface
                 TableColumn<Map<String, String>, String> currColumnView = new TableColumn<>(columnName);
 
                 if (columnName.startsWith(DatabaseUserTables.ID_COLUMN)
-                    && !UniversityData.getInstance().getCurrentRole().equals(DatabaseRoles.ADMIN_EMPLOYEE))
+                    && !UniversityData.getInstance().getCurrentRole().equals(DatabaseUsers.ADMIN_EMPLOYEE))
                 {
                     LOG.debug("Set ID column invisible");
                     currColumnView.setVisible(false);
@@ -150,9 +152,8 @@ public class UserMainInterface
 
             // set selection mode to to single mode --> multi selection is now disabled
             shownTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-
+            shownTable.autosize();
             this.tableScrollPane.setContent(shownTable);
-
         }
         catch (SQLException e)
         {

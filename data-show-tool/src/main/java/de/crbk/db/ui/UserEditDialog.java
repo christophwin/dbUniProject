@@ -7,7 +7,7 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
-import de.crbk.db.common.DatabaseRoles;
+import de.crbk.db.common.DatabaseUsers;
 import de.crbk.db.common.DatabaseUserTables;
 import de.crbk.db.controller.UniversityData;
 import javafx.collections.transformation.FilteredList;
@@ -54,7 +54,7 @@ public class UserEditDialog implements Initializable
         {
             LOG.debug("Current collum for creation: " + currCol);
             if (currCol.getKey().startsWith(DatabaseUserTables.ID_COLUMN)
-                    && !UniversityData.getInstance().getCurrentRole().equals(DatabaseRoles.ADMIN_EMPLOYEE) && isUpdate)
+                    && !UniversityData.getInstance().getCurrentRole().equals(DatabaseUsers.ADMIN_EMPLOYEE) && isUpdate)
             {
                 LOG.debug("ID will not be shown for this user.");
                 continue;
