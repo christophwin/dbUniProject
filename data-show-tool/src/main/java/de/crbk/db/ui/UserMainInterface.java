@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.log4j.Logger;
 
 import de.crbk.db.common.Constants;
-import de.crbk.db.common.DatabaseUsers;
 import de.crbk.db.common.DatabaseUserTables;
+import de.crbk.db.common.DatabaseUsers;
 import de.crbk.db.controller.UniversityData;
 import de.crbk.db.exceptions.DataToolException;
 import javafx.application.Application;
@@ -24,21 +24,19 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
  * Implementation of the main user interface
  */
-public class UserMainInterface
-    extends Application
+public class UserMainInterface extends Application
 {
     private static final Logger LOG = Logger.getLogger(UserMainInterface.class);
 
@@ -50,6 +48,15 @@ public class UserMainInterface
 
     @FXML
     private ScrollPane tableScrollPane;
+    
+    @FXML
+    private Button btnAdd;
+
+    @FXML
+    private Button btnDelete;
+
+    @FXML
+    private Button btnChange;
 
     private String selectedView;
 
@@ -80,16 +87,18 @@ public class UserMainInterface
         {
             LOG.info("No data input.");
             AlertDialog.startDialog(AlertType.WARNING, "No input given.",
-                                    "The identification number has to be filled.");
+                    "The identification number has to be filled.");
             return;
         }
+
+        disableButtons();
+
         try
         {
             if (shownTable != null)
             {
                 LOG.info("Remove old table view.");
                 this.tableScrollPane.setContent(null);
-                this.shownTable = null;
             }
 
             UniversityData.getInstance().createDatabaseConnection();
@@ -98,17 +107,26 @@ public class UserMainInterface
                 return;
             }
 
-            ObservableList<String> viewsForRole =
-                FXCollections.observableArrayList(UniversityData.getInstance().getAllViews());
+            ObservableList<String> viewsForRole = FXCollections
+                    .observableArrayList(UniversityData.getInstance().getAllViews());
             this.resultListView.setItems(viewsForRole);
-
         }
         catch (DataToolException e)
         {
             LOG.error(e.getMessage(), e);
             AlertDialog.startDialog(AlertType.ERROR, "An error occur while database connection.",
-                                    "See stack trace for details.", e);
+                    "See stack trace for details.", e);
         }
+    }
+
+    /**
+     * disable buttons
+     */
+    private void disableButtons()
+    {
+        this.btnAdd.setDisable(true);
+        this.btnDelete.setDisable(true);
+        this.btnChange.setDisable(true);
     }
 
     /**
@@ -120,11 +138,22 @@ public class UserMainInterface
         LOG.info("Following view was selected: " + resultListView.selectionModelProperty().getName());
         selectedView = resultListView.getSelectionModel().getSelectedItem();
 
-        String query = "SELECT * FROM " + selectedView;
+        disableButtons();
+
+        String query = "";
+        if (!UniversityData.getInstance().getCurrentUser().equalsIgnoreCase(DatabaseUsers.ADMIN_EMPLOYEE))
+        {
+            query = "SELECT * FROM " + selectedView + " WHERE " + DatabaseUserTables.ID_COLUMN + " = "
+                    + UniversityData.getInstance().getCurrentIdentificationNumber();
+        }
+        else
+        {
+            query = "SELECT * FROM " + selectedView;
+        }
         LOG.debug("Exceute SQL-query: " + query);
 
         try (PreparedStatement stmt = UniversityData.getInstance().getDatabaseConnection().prepareStatement(query);
-                        ResultSet result = stmt.executeQuery())
+                ResultSet result = stmt.executeQuery())
         {
 
             shownTable = new TableView<>(generateValueForView(result));
@@ -137,7 +166,7 @@ public class UserMainInterface
                 TableColumn<Map<String, String>, String> currColumnView = new TableColumn<>(columnName);
 
                 if (columnName.startsWith(DatabaseUserTables.ID_COLUMN)
-                    && !UniversityData.getInstance().getCurrentRole().equals(DatabaseUsers.ADMIN_EMPLOYEE))
+                        && !UniversityData.getInstance().getCurrentUser().equals(DatabaseUsers.ADMIN_EMPLOYEE))
                 {
                     LOG.debug("Set ID column invisible");
                     currColumnView.setVisible(false);
@@ -153,21 +182,47 @@ public class UserMainInterface
             // set selection mode to to single mode --> multi selection is now disabled
             shownTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
             shownTable.autosize();
+            shownTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             this.tableScrollPane.setContent(shownTable);
+
+            enableButtons();
         }
         catch (SQLException e)
         {
             AlertDialog.startDialog(AlertType.ERROR, "Connot open view.",
-                                    "Cannot load follwing view from database. View: " + selectedView, e);
+                    "Cannot load follwing view from database. View: " + selectedView, e);
             LOG.error("Error while loading view.", e);
+        }
+    }
+
+    /**
+     * enable the right buttons
+     */
+    private void enableButtons()
+    {
+        if (UniversityData.getInstance().getCurrentUser().equalsIgnoreCase(DatabaseUsers.ADMIN_EMPLOYEE))
+        {
+            LOG.debug("Set all button on enabled.");
+            this.btnAdd.setDisable(false);
+            this.btnDelete.setDisable(false);
+            this.btnChange.setDisable(false);
+        }
+        else if (selectedView.equalsIgnoreCase(DatabaseUserTables.VIEW_ASSISTANT)
+                || selectedView.equalsIgnoreCase(DatabaseUserTables.VIEW_STUDENT)
+                || selectedView.equalsIgnoreCase(DatabaseUserTables.VIEW_PROFESSOR))
+        {
+            LOG.debug("Set change button on enabled.");
+            this.btnChange.setDisable(false);
         }
     }
 
     /**
      * generates a list which include a map for every resultset row
      * 
-     * @param resultSet resultset with all values
-     * @param columnNames column names like in the resultSet
+     * @param resultSet
+     *            resultset with all values
+     * @param columnNames
+     *            column names like in the resultSet
      * @return
      * @throws SQLException
      */
@@ -201,7 +256,7 @@ public class UserMainInterface
     {
         LOG.info("Change was clicked. Call dialog.");
         if (shownTable == null || shownTable.getSelectionModel().isEmpty()
-            || shownTable.getSelectionModel().getSelectedItem() == null)
+                || shownTable.getSelectionModel().getSelectedItem() == null)
         {
             LOG.info("No row was selected.");
             AlertDialog.startDialog(AlertType.INFORMATION, "Please select a row to edit it", "No row was selected");
@@ -213,7 +268,8 @@ public class UserMainInterface
     /**
      * starts the edit dialog
      * 
-     * @param isUpdate set if the started dialog is for insert or not
+     * @param isUpdate
+     *            set if the started dialog is for insert or not
      */
     private void startEditDialog(boolean isUpdate, Map<String, String> values)
     {
@@ -240,7 +296,7 @@ public class UserMainInterface
         {
             LOG.error(e.getMessage(), e);
             AlertDialog.startDialog(AlertType.ERROR, "Error while starting dialog.",
-                                    "Look at stack trace for more information.", e);
+                    "Look at stack trace for more information.", e);
         }
     }
 
@@ -279,7 +335,7 @@ public class UserMainInterface
     {
         LOG.info("Delete clicked.");
         if (shownTable == null || shownTable.getSelectionModel().isEmpty()
-            || shownTable.getSelectionModel().getSelectedItem() == null)
+                || shownTable.getSelectionModel().getSelectedItem() == null)
         {
             LOG.info("No row was selected.");
             AlertDialog.startDialog(AlertType.INFORMATION, "Please select a row to delete it.", "No row was selected");
@@ -293,7 +349,8 @@ public class UserMainInterface
         query.append(" WHERE ");
 
         AtomicBoolean first = new AtomicBoolean(true);
-        selectedRow.forEach((key, value) -> {
+        selectedRow.forEach((key, value) ->
+        {
             if (key.startsWith(DatabaseUserTables.ID_COLUMN))
             {
                 if (first.get())
@@ -318,7 +375,9 @@ public class UserMainInterface
         {
             LOG.error(e.getMessage(), e);
             AlertDialog.startDialog(AlertType.ERROR, "Error while delete row.",
-                                    "Please try again or see stack trace for details.", e);
+                    "Please try again or see stack trace for details.", e);
         }
+
+        viewSelected();
     }
 }

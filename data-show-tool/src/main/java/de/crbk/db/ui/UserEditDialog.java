@@ -7,8 +7,8 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
-import de.crbk.db.common.DatabaseUsers;
 import de.crbk.db.common.DatabaseUserTables;
+import de.crbk.db.common.DatabaseUsers;
 import de.crbk.db.controller.UniversityData;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
@@ -54,7 +54,7 @@ public class UserEditDialog implements Initializable
         {
             LOG.debug("Current collum for creation: " + currCol);
             if (currCol.getKey().startsWith(DatabaseUserTables.ID_COLUMN)
-                    && !UniversityData.getInstance().getCurrentRole().equals(DatabaseUsers.ADMIN_EMPLOYEE) && isUpdate)
+                    && !UniversityData.getInstance().getCurrentUser().equals(DatabaseUsers.ADMIN_EMPLOYEE) && isUpdate)
             {
                 LOG.debug("ID will not be shown for this user.");
                 continue;
@@ -106,9 +106,9 @@ public class UserEditDialog implements Initializable
                 LOG.debug("Create an insert statement.");
                 Map<String, String> columnsToInsert = getUpdateValues(textFields);
                 LOG.debug("Insert columns: " + columnsToInsert);
-                if(!columnsToInsert.isEmpty())
+                if (!columnsToInsert.isEmpty())
                 {
-                    UniversityData.getInstance().executeSqlStatement(createInsertStatement(columnsToInsert));    
+                    UniversityData.getInstance().executeSqlStatement(createInsertStatement(columnsToInsert));
                 }
                 else
                 {
@@ -130,18 +130,18 @@ public class UserEditDialog implements Initializable
      * creates an insert statement for database
      * 
      * @param columnsToInsert
-     * @return 
+     * @return
      */
     private String createInsertStatement(Map<String, String> columnsToInsert)
     {
         LOG.debug("Create insert statement.");
-        
+
         StringBuilder columns = new StringBuilder();
         StringBuilder values = new StringBuilder();
         boolean first = true;
-        for(Map.Entry<String, String> currEntry : columnsToInsert.entrySet())
+        for (Map.Entry<String, String> currEntry : columnsToInsert.entrySet())
         {
-            if(first)
+            if (first)
             {
                 first = false;
             }
@@ -150,11 +150,11 @@ public class UserEditDialog implements Initializable
                 columns.append(", ");
                 values.append(", ");
             }
-            
+
             columns.append(currEntry.getKey());
             values.append("'").append(currEntry.getValue()).append("'");
         }
-        
+
         StringBuilder sb = new StringBuilder("INSERT INTO ");
         sb.append(view).append(" (");
         sb.append(columns).append(") ");

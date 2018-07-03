@@ -13,14 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.print.URIException;
-
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import de.crbk.db.common.Constants;
-import de.crbk.db.common.DatabaseUsers;
 import de.crbk.db.common.DatabaseUserTables;
+import de.crbk.db.common.DatabaseUsers;
 import de.crbk.db.exceptions.DataToolException;
 import de.crbk.db.ui.AlertDialog;
 import de.crbk.db.ui.UserMainInterface;
@@ -40,6 +38,8 @@ public class UniversityData
     private Connection databaseConnection = null;
 
     private String currentUser;
+
+    private String currentIdentificationNumber;
 
     /**
      * start method
@@ -99,7 +99,7 @@ public class UniversityData
             Properties props = new Properties();
             props.load(new FileInputStream(new File(this.getClass().getResource(Constants.PROPERTIES_FILE).toURI())));
             createDatabaseConnection(props.getProperty(Constants.USER_PROP),
-                                     props.getProperty(Constants.PASSWORD_PROP));
+                    props.getProperty(Constants.PASSWORD_PROP));
         }
         catch (IOException | URISyntaxException e)
         {
@@ -111,7 +111,8 @@ public class UniversityData
      * create the initial database connection <br>
      * set 'auto-commit' to 'false'
      * 
-     * @throws DataToolException if a error occur while connection
+     * @throws DataToolException
+     *             if a error occur while connection
      */
     public void createDatabaseConnection(String user, String password)
         throws DataToolException
@@ -127,7 +128,7 @@ public class UniversityData
             LOG.info("URL: " + connectionUrl);
 
             databaseConnection = DriverManager.getConnection(connectionUrl, user, password);
-            
+
             databaseConnection.setAutoCommit(false);
             LOG.info("Database connection is valid: " + databaseConnection.isValid(1000));
         }
@@ -159,7 +160,8 @@ public class UniversityData
     }
 
     /**
-     * checks if the given identification number is given in one of the user tables <br>
+     * checks if the given identification number is given in one of the user tables
+     * <br>
      * set right role for this session
      * 
      * @param identificationNumber
@@ -194,10 +196,11 @@ public class UniversityData
         else
         {
             AlertDialog.startDialog(AlertType.WARNING, "Identification number does not exist.",
-                                    "The given indentification number '" + identificationNumber
-                                        + "' does not exist in database.");
+                    "The given indentification number '" + identificationNumber + "' does not exist in database.");
             return false;
         }
+
+        this.currentIdentificationNumber = identificationNumber;
 
         return true;
     }
@@ -213,20 +216,20 @@ public class UniversityData
     private boolean existInTable(String table, String identificationNumber)
         throws DataToolException
     {
-        String statement =
-            "SELECT * FROM " + table + " WHERE " + DatabaseUserTables.ID_COLUMN + " = '" + identificationNumber + "'";
+        String statement = "SELECT * FROM " + table + " WHERE " + DatabaseUserTables.ID_COLUMN + " = '"
+                + identificationNumber + "'";
 
         LOG.debug("Execute following statement: " + statement);
 
         try (PreparedStatement stmt = databaseConnection.prepareStatement(statement);
-                        ResultSet result = stmt.executeQuery())
+                ResultSet result = stmt.executeQuery())
         {
             return result.next();
         }
         catch (SQLException e)
         {
             throw new DataToolException("Error occur while checking if currnet identification number '"
-                + identificationNumber + "' exist in following table '" + table + "'.", e);
+                    + identificationNumber + "' exist in following table '" + table + "'.", e);
         }
     }
 
@@ -270,7 +273,7 @@ public class UniversityData
         LOG.debug("Execute for views: " + query);
         List<String> views = new ArrayList<>();
         try (PreparedStatement stmt = databaseConnection.prepareStatement(query);
-                        ResultSet result = stmt.executeQuery())
+                ResultSet result = stmt.executeQuery())
         {
             result.beforeFirst();
             while (result.next())
@@ -290,8 +293,10 @@ public class UniversityData
     /**
      * execute SQL statement without result
      * 
-     * @param statement SQL statement
-     * @throws SQLException thrown if exception occurs
+     * @param statement
+     *            SQL statement
+     * @throws SQLException
+     *             thrown if exception occurs
      */
     public void executeSqlStatement(String statement)
         throws SQLException
@@ -315,8 +320,13 @@ public class UniversityData
         return databaseConnection;
     }
 
-    public String getCurrentRole()
+    public String getCurrentUser()
     {
         return currentUser;
+    }
+
+    public String getCurrentIdentificationNumber()
+    {
+        return currentIdentificationNumber;
     }
 }
