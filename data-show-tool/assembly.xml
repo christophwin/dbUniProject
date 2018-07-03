@@ -28,7 +28,7 @@
 			<outputDirectory></outputDirectory>
 		</fileSet>
 		<fileSet>
-			<directory>${basedir}fonts_fxml</directory>
+			<directory>${basedir}/fonts_fxml</directory>
 			<outputDirectory>fonts_fxml</outputDirectory>
 		</fileSet>
 		<fileSet>
