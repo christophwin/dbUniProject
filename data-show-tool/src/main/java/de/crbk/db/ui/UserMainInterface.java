@@ -111,9 +111,9 @@ public class UserMainInterface extends Application
                 return;
             }
 
-            ObservableList<String> viewsForRole = FXCollections
+            ObservableList<String> viewsForUser = FXCollections
                     .observableArrayList(UniversityData.getInstance().getAllViews());
-            this.resultListView.setItems(viewsForRole);
+            this.resultListView.setItems(viewsForUser);
         }
         catch (DataToolException e)
         {

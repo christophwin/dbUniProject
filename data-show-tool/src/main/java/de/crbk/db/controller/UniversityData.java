@@ -153,7 +153,7 @@ public class UniversityData
     /**
      * checks if the given identification number is given in one of the user tables
      * <br>
-     * set right role for this session
+     * set right user for this session
      * 
      * @param identificationNumber
      * @return true -> number is known false -> number is nor known
@@ -162,7 +162,7 @@ public class UniversityData
     public boolean setUserForInput(String identificationNumber)
         throws DataToolException
     {
-        LOG.debug("Try to find role for following identification number: " + identificationNumber);
+        LOG.debug("Try to find user for following identification number: " + identificationNumber);
 
         if (existInTable(DatabaseUserTables.ASSISTANT_TABLE, identificationNumber))
         {
@@ -225,7 +225,7 @@ public class UniversityData
     }
 
     /**
-     * set given role for session
+     * set given user for session
      * 
      * @param user
      * @throws DataToolException
@@ -277,7 +277,7 @@ public class UniversityData
             throw new DataToolException("Error while getting avaible views.", e);
         }
 
-        LOG.info("Views for current role.");
+        LOG.info("Views for current user.");
         return views;
     }
 
